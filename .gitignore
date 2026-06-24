@@ -1,0 +1,11 @@
+bin/
+obj/
+node_modules/
+__pycache__/
+*.pyc
+aspire-output/
+Frontend/dist/
+*.tsbuildinfo
+*.user
+*.suo
+.vs/
