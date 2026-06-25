@@ -7,6 +7,7 @@
 
 #pragma warning disable ASPIRECERTIFICATES001
 #pragma warning disable ASPIREPIPELINES001
+#pragma warning disable ASPIREJAVASCRIPT001
 
 using Aspire.Hosting.Pipelines;
 
@@ -36,6 +37,8 @@ var insightsApi = builder.AddUvicornApp("insights-api", "./insights-api", "main:
 
 var frontend = builder.AddViteApp("frontend", "./Frontend")
     .WithEnvironment("VITE_SESSIONS_API", sessionsApi.GetEndpoint("http"))
-    .WithEnvironment("VITE_INSIGHTS_API", insightsApi.GetEndpoint("http"));
+    .WithEnvironment("VITE_INSIGHTS_API", insightsApi.GetEndpoint("http"))
+    .PublishAsStaticWebsite()
+    .WithExternalHttpEndpoints();
 
 builder.Build().Run();
