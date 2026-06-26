@@ -6,12 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<ConferenceDbContext>("conferencedb");
-builder.Services.AddCors();
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
-app.UseCors(c => c.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 using (var scope = app.Services.CreateScope())
 {

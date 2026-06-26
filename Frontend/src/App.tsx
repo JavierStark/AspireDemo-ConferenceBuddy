@@ -26,12 +26,9 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const sessionsApi = import.meta.env.VITE_SESSIONS_API || ''
-    const insightsApi = import.meta.env.VITE_INSIGHTS_API || ''
-
     Promise.all([
-      fetch(`${sessionsApi}/api/sessions`).then(r => r.json()),
-      fetch(`${insightsApi}/api/insights/trending`).then(r => r.json()),
+      fetch('/api/sessions').then(r => r.json()),
+      fetch('/api/insights/trending').then(r => r.json()),
     ])
       .then(([sessionsData, trendingData]) => {
         setSessions(sessionsData)
@@ -45,18 +42,16 @@ function App() {
   }, [])
 
   const handleSessionClick = (id: number) => {
-    const insightsApi = import.meta.env.VITE_INSIGHTS_API || ''
     setSelectedSession(id)
-    fetch(`${insightsApi}/api/insights/related?sessionId=${id}`)
+    fetch(`/api/insights/related?sessionId=${id}`)
       .then(r => r.json())
       .then(setRelated)
       .catch(() => setRelated([]))
   }
 
   const handleBookmark = async (id: number) => {
-    const sessionsApi = import.meta.env.VITE_SESSIONS_API || ''
     try {
-      const res = await fetch(`${sessionsApi}/api/sessions/${id}/bookmark`, { method: 'POST' })
+      const res = await fetch(`/api/sessions/${id}/bookmark`, { method: 'POST' })
       const updated = await res.json()
       setSessions(prev => prev.map(s => s.id === id ? updated : s))
     } catch (err) {

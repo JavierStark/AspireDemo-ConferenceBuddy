@@ -4,12 +4,14 @@
 #:package Aspire.Hosting.Python@13.4.6
 #:package Aspire.Hosting.JavaScript@13.4.6
 #:package Aspire.Hosting.Docker@13.4.6
+#:package Aspire.Hosting.Yarp@13.4.6
 
 #pragma warning disable ASPIRECERTIFICATES001
 #pragma warning disable ASPIREPIPELINES001
 #pragma warning disable ASPIREJAVASCRIPT001
 
 using Aspire.Hosting.Pipelines;
+using Aspire.Hosting.Yarp;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -36,9 +38,21 @@ var insightsApi = builder.AddUvicornApp("insights-api", "./insights-api", "main:
     .WithHttpHealthCheck("/health");
 
 var frontend = builder.AddViteApp("frontend", "./Frontend")
-    .WithEnvironment("VITE_SESSIONS_API", sessionsApi.GetEndpoint("http"))
-    .WithEnvironment("VITE_INSIGHTS_API", insightsApi.GetEndpoint("http"))
-    .PublishAsStaticWebsite()
-    .WithExternalHttpEndpoints();
+    .WithReference(sessionsApi)
+    .WithReference(insightsApi);
+
+var gateway = builder.AddYarp("gateway")
+    .WithConfiguration(yarp =>
+    {
+        yarp.AddRoute("/api/sessions/{**catch-all}", sessionsApi);
+        yarp.AddRoute("/api/insights/{**catch-all}", insightsApi);
+
+        if (builder.ExecutionContext.IsRunMode)
+        {
+            yarp.AddRoute("{**catch-all}", frontend);
+        }
+    })
+    .WithExternalHttpEndpoints()
+    .PublishWithStaticFiles(frontend);
 
 builder.Build().Run();
